@@ -12,8 +12,9 @@ class TestcontainersSpec : WordSpec({
     "testcontainers" should {
         "be accessible in Jenkins" {
             withDatabase { dbHost, dbPort ->
+                println("Attempting connection to $dbHost:$dbPort")
                 val url = "jdbc:postgresql://$dbHost:$dbPort/products"
-                val props = with(Properties()){
+                val props = with(Properties()) {
                     setProperty("user", "developer")
                     setProperty("password", "password123")
                     this
@@ -21,12 +22,14 @@ class TestcontainersSpec : WordSpec({
                 val conn = DriverManager.getConnection(url, props)
                 val prepareStatement = conn.prepareStatement("SELECT 1")
                 val resultSet = prepareStatement.executeQuery()
-                if(resultSet.next()){
+                if (resultSet.next()) {
                     val result = resultSet.getInt(1)
                     result shouldBe 1
                 } else {
                     fail("no result found")
                 }
+                prepareStatement.close()
+                conn.close()
             }
         }
     }
